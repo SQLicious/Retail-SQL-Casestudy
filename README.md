@@ -10,7 +10,7 @@ It consists of three CSV files:
 
 **Sales Data-set.csv**: This file contains the transactional data of the retail chain, including information such as date, store number, department number, weekly sales, and an indicator of whether the week is a special holiday week.
 
-**Product Data-set.csv**: This file provides product-related information within the retail chain. It includes details like product number, department, category, sub-category, and cost.
+**Features Data-set.csv**: This file contains additional data related to the store, department, and regional activity for the given dates. It includes details like store, date, temperature, Markdown 1-5 
 
 **Stores Data-set.csv**: In this file, you will find essential store information, including store number, city, state, region, and size.of the retail chain, such as store number, city, state, region, and size.
 
