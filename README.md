@@ -14,6 +14,8 @@ It consists of three CSV files:
 
 **Stores Data-set.csv**: In this file, you will find essential store information, including store number, city, state, region, and size.of the retail chain, such as store number, city, state, region, and size.
 
+**Questions**
+The following business questions are answered in this project using SQL queries and data visualization:
 
 
 **1. Data Retrieval:**
