@@ -5,15 +5,16 @@ This project is a case study analysis of a retail store dataset from Kaggle usin
 
 Dataset
 
-The dataset used in this project can be found here. It consists of three CSV files:
+The dataset used in this project can be found here https://www.kaggle.com/datasets/manjeetsingh/retaildataset
+It consists of three CSV files:
 
-Sales Data-set.csv: This file contains the transactional data of the retail chain, including information such as date, store number, department number, weekly sales, and an indicator of whether the week is a special holiday week.
+**Sales Data-set.csv**: This file contains the transactional data of the retail chain, including information such as date, store number, department number, weekly sales, and an indicator of whether the week is a special holiday week.
 
-Product Data-set.csv: This file provides product-related information within the retail chain. It includes details like product number, department, category, sub-category, and cost.
+**Product Data-set.csv**: This file provides product-related information within the retail chain. It includes details like product number, department, category, sub-category, and cost.
 
-Stores Data-set.csv: In this file, you will find essential store information, including store number, city, state, region, and size.of the retail chain, such as store number, city, state, region, and size.
+**Stores Data-set.csv**: In this file, you will find essential store information, including store number, city, state, region, and size.of the retail chain, such as store number, city, state, region, and size.
 
-https://www.kaggle.com/datasets/manjeetsingh/retaildataset
+
 
 **1. Data Retrieval:**
 Write an SQL query to retrieve the total weekly sales for each department in each store. Include the store number, department number, week, and the sum of weekly sales.
