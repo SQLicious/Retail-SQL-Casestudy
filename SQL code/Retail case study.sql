@@ -1,7 +1,8 @@
-# Date created and Last ran : 08-23-2023 
+# Date first created: 08-23-2023 
+# Last ran: 08-25-2023 
 # Retail Data Set Case Study
-# Data Source : Kaggle, Link https://www.kaggle.com/datasets/manjeetsingh/retaildataset
-# Course: Submission for  Cosmo AI Learning Community Week 3 Assignment
+# Data Source: Kaggle, Link https://www.kaggle.com/datasets/manjeetsingh/retaildataset
+# Submission for Cosmo AI Learning Community Week 3 Assignment
 
 /* Lets Create the Tables in a new Database called Retail*/
 
@@ -13,7 +14,7 @@ CREATE TABLE stores (
   Type VARCHAR(1),
   Size INT
 );
-describe table stores;
+DESCRIBE table stores;
 
 CREATE TABLE features (
   Store INT,
@@ -68,10 +69,10 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 
-/* Validate the dat has been loaded */
+/* Validate the data has been loaded */
 SELECT * from stores LIMIT 10;
 SELECT * from features limit 10;
-SELECT * from sales LIMIT 10;
+SELECT * from sales; LIMIT 10;
 /* Add a new column to identify major USA holidays */
 
 ALTER TABLE features
@@ -106,31 +107,31 @@ SELECT store,
 FROM features 
 where IsHoliday = TRUE;
 
-
 /* 1. Data Retrieval: Write an SQL query to retrieve the total weekly sales for each department in each store.
  Include the store number, department number, week, and the sum of weekly sales. */
  
-SELECT Store,
-	   Dept,
-       Date,
-       SUM(Weekly_Sales) AS Total_Weekly_Sales
-FROM sales
-GROUP BY Store, Dept, Date
-ORDER BY Store ASC, Dept ASC, Date ASC;
+SELECT 
+    Store, Dept,
+    Date,
+    SUM(Weekly_Sales) AS Total_Weekly_Sales
+FROM
+    sales
+GROUP BY Store , Dept , Date
+ORDER BY Store ASC , Dept ASC , Date ASC;
 
 /* 2. Data Aggregation: Calculate the average consumer price index (CPI) for each store over the entire period. 
 Display the store number and its average CPI. */
 
 SELECT 
     Store,
-    AVG(CPI) AS Average_CPI
+    ROUND(AVG(CPI),2) AS Average_CPI
 FROM
     features
 GROUP BY Store
-ORDER BY Store ASC;
+ORDER BY Average_CPI DESC, Store ASC;
 
 /* 3. Joining Tables: Combine the ‘Sales’ and ‘Features’ tables to retrieve the store number, department number, date, and weekly sales
- where the consumer price index (CPI) is greater than 160. */
+ where the consumer price index (CPI) is greater than 160. - reVOSI FOR ACCURACY */
 
 SELECT 
     s.Store,
@@ -148,21 +149,23 @@ ORDER BY s.Store ASC , s.Dept ASC , s.Date ASC;
 /* 4. Subqueries and Filtering: Find the department(s) with the highest weekly sales in a specific store during a holiday week. 
 Display the store number, department number, and week. */
 
--- Use a CTE to create a temporary table that contains the store number, department number, date, weekly sales, and rank for weekly sales
+-- Use  CTE to hold the store number, department number, date, weekly sales, and rank for weekly sales
 WITH holiday_sales AS (
-  SELECT s.Store, s.Dept, s.Date, s.Weekly_Sales,f.HolidayName,
+  SELECT s.Store,
+			s.Dept, s.Date, s.Weekly_Sales,f.HolidayName,
          RANK() OVER (PARTITION BY s.Store ORDER BY s.Weekly_Sales DESC) AS Sales_Rank
   FROM sales s
   JOIN features f ON s.Store = f.Store AND s.Date = f.Date
   WHERE f.IsHoliday = TRUE
 )
--- Now use the CTE  above to find the highest weekly sales in a specific store during a holiday week
--- Use WEEK(), Use mode 2 to get the week number as Sunday is the first day and Week 1 has a Sunday. This fits the sales data table logic
+/* Used the CTE  above to find the highest weekly sales in a specific store during a holiday week
+Use WEEK() func, Use mode 2 to get the week number as Sunday is the first day and Week 1 has a Sunday in 2010 */
 SELECT 
     Store,
     Dept,
     Date,
     WEEK (Date, 2) AS Week_Number, 
+    Weekly_sales,
     HolidayName
 FROM
     holiday_sales
@@ -174,8 +177,8 @@ ORDER BY Store ASC , Dept ASC , Date ASC;
  compare them to non-holiday weeks. Display the department number, average sales on holidays, and average sales on non-holidays. */
  
  SELECT s.Dept,
-       AVG(CASE WHEN f.IsHoliday = TRUE THEN s.Weekly_Sales ELSE NULL END) AS Average_Sales_Holiday,
-       AVG(CASE WHEN f.IsHoliday = FALSE THEN s.Weekly_Sales ELSE NULL END) AS Average_Sales_Non_Holiday
+       TRUNCATE(AVG(CASE WHEN f.IsHoliday = TRUE THEN s.Weekly_Sales ELSE NULL END),2) AS Average_Sales_Holiday,
+       TRUNCATE(AVG(CASE WHEN f.IsHoliday = FALSE THEN s.Weekly_Sales ELSE NULL END),2) AS Average_Sales_Non_Holiday
 FROM sales s
 JOIN features f ON s.Store = f.Store AND s.Date = f.Date
 WHERE f.MarkDown1 IS NOT NULL OR f.MarkDown2 IS NOT NULL OR f.MarkDown3 IS NOT NULL OR f.MarkDown4 IS NOT NULL OR f.MarkDown5 IS NOT NULL
@@ -185,22 +188,35 @@ ORDER BY s.Dept desc;
 /* 6. Store-Specific Recommendations: Identify the store with the highest sales during a Super Bowl holiday week.
  Retrieve the store number, department number, week, and sales for that specific store. */
  
--- Use a CTE to create a temporary table that contains the store number, department number, date, weekly sales, and rank for Super Bowl holiday weeks
-
+-- Create a common table expression (CTE) to calculate total sales during Super Bowl weeks for each department and store
 WITH super_bowl_sales AS (
-  SELECT s.Store, s.Dept, s.Date, s.Weekly_Sales,
-         RANK() OVER (ORDER BY SUM(s.Weekly_Sales) DESC) AS Store_Rank
-  FROM sales s
-  JOIN features f ON s.Store = f.Store AND s.Date = f.Date
-  WHERE f.IsHoliday = TRUE AND f.HolidayName = 'Super Bowl'
-  GROUP BY s.Store, s.Dept, s.Date
+  SELECT
+    EXTRACT(YEAR FROM s.Date) AS Year, -- Extract the year from the date
+    s.Store, -- Store number
+    s.Dept, -- Department number
+    SUM(s.Weekly_Sales) AS Total_Sales, -- Calculate the total sales for the department and store
+    ROW_NUMBER() OVER (PARTITION BY EXTRACT(YEAR FROM s.Date) ORDER BY SUM(s.Weekly_Sales) DESC) AS Sales_Rank -- Rank the rows by total sales within each year
+  FROM
+    sales s
+    JOIN features f ON s.Store = f.Store AND s.Date = f.Date
+  WHERE
+    f.IsHoliday = TRUE AND f.HolidayName = 'Super Bowl' -- Select Super Bowl holiday weeks
+    AND EXTRACT(YEAR FROM s.Date) BETWEEN 2010 AND 2012 -- Filter data for years 2010 to 2012
+  GROUP BY
+    EXTRACT(YEAR FROM s.Date), s.Store, s.Dept -- Group by year, store, and department
 )
--- Use CTE to get store, dept, date, and sales for top grossing store during a Super Bowl holiday week
-
-SELECT Store, Dept, Date, Weekly_Sales
-FROM super_bowl_sales
-WHERE Store_Rank = 1 -- filters by the highest rank
-ORDER BY Store ASC , Dept ASC , Date ASC;
+-- Select the highest performing department and store combination for each year during Super Bowl week
+SELECT
+  Year, -- Year
+  Store, -- Store number
+  Dept, -- Department number
+  Total_Sales -- Total sales for the combination
+FROM
+  super_bowl_sales
+WHERE
+  Sales_Rank = 1 -- Select only the highest performing combination
+ORDER BY
+  Year, Store; -- Order the result by year and store number
 
 /*7. Markdown Impact Evaluation: Waiting for a clarificatin TB Solved*/ 
 
