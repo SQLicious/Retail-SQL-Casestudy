@@ -3,7 +3,7 @@ Retail Dataset Sales Case Study Analysis using SQL
 
 This project is a case study analysis of a retail store dataset from Kaggle using SQL. The dataset contains information about sales, features, and stores of a retail chain. The goal of this project is to answer various business questions using SQL queries and data visualization.
 
-##Dataset
+##  Dataset
 
 The dataset used in this project can be found here https://www.kaggle.com/datasets/manjeetsingh/retaildataset
 It consists of three CSV files:
